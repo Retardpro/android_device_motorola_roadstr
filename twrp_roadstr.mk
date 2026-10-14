@@ -1,34 +1,33 @@
-# Copyright (C) 2017-2023 The Android Open Source Project
-# Copyright (C) 2014-2023 The Team Win LLC
+#
+# Copyright (C) 2023 The Android Open Source Project
+# Copyright (C) 2023 SebaUbuntu's TWRP device tree generator
+#
 # SPDX-License-Identifier: Apache-2.0
+#
 
-# Release name (automatically taken from this file's suffix)
-PRODUCT_RELEASE_NAME := $(lastword $(subst /, ,$(lastword $(subst _, ,$(firstword $(subst ., ,$(MAKEFILE_LIST)))))))
-
-# Custom vendor used in build tree (automatically taken from this file's prefix)
-CUSTOM_VENDOR := $(lastword $(subst /, ,$(firstword $(subst _, ,$(firstword $(MAKEFILE_LIST))))))
-
-# Inherit from our custom product configuration
-$(call inherit-product, vendor/$(CUSTOM_VENDOR)/config/common.mk)
-
-# Inherit any OrangeFox-specific settings
-$(call inherit-product-if-exists, $(DEVICE_PATH)/fox_roadstr.mk)
-
-# Enable project quotas and casefolding for emulated storage without sdcardfs
+# Inherit from those products. Most specific first.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit_only.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
 
-# OEM Info (automatically taken from device tree path)
-BOARD_VENDOR := $(or $(word 2,$(subst /, ,$(firstword $(MAKEFILE_LIST)))),$(value 2))
+# Inherit some common Orange Fox stuff.
+$(call inherit-product, vendor/twrp/config/common.mk)
 
-# Device identifier. This must come after all inclusions.
-PRODUCT_DEVICE := $(PRODUCT_RELEASE_NAME)
-PRODUCT_NAME := $(CUSTOM_VENDOR)_$(PRODUCT_RELEASE_NAME)
-PRODUCT_BRAND := MOTOROLA
-PRODUCT_MODEL := Moto Edge 70
-PRODUCT_MANUFACTURER := Motorola
+# Inherit from tank device
+$(call inherit-product, device/motorola/roadstr/device.mk)
 
-# Device path for OEM device tree
-DEVICE_PATH := device/motorola/roadstr
+PRODUCT_DEVICE := roadstr
+PRODUCT_NAME := twrp_roadstr
+PRODUCT_BRAND := motorola
+PRODUCT_MODEL := motorola edge 70
+PRODUCT_MANUFACTURER := motorola
 
-# Inherit from hardware-specific part of the product configuration
-$(call inherit-product, $(DEVICE_PATH)/device.mk)
+PRODUCT_GMS_CLIENTID_BASE := android-motorola
+
+PRODUCT_BUILD_PROP_OVERRIDES += \
+    PRIVATE_BUILD_DESC="roadstr-user 15 VWR35HV-A171-ST3 5cdb7 test-keys"
+
+BUILD_FINGERPRINT := motorola/roadstr/roadstr:15/VWR35HV-A171-ST3/5cdb7:user/release-keys
