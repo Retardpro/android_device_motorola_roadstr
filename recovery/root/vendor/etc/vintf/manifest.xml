@@ -1,0 +1,62 @@
+<!--
+    Input:
+        device/qcom/sun/manifest_sun.xml
+        device/moto/roadstr/manifest_roadstr.xml
+        device/moto/roadstr/manifest_spu.xml
+        device/moto/roadstr/fingerprint/manifest_IMoto_AIDL_Fingerprint.xml
+        motorola/hardware/interfaces/ifaa/service_qcom/manifest.xml
+-->
+<manifest version="8.0" type="device" target-level="202404">
+    <hal format="aidl">
+        <name>android.hardware.biometrics.fingerprint</name>
+        <version>3</version>
+        <fqname>IFingerprint/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>android.hardware.gatekeeper</name>
+        <fqname>IGatekeeper/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>android.hardware.nfc</name>
+        <fqname>INfc/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>android.hardware.secure_element</name>
+        <fqname>ISecureElement/eSE1</fqname>
+    </hal>
+    <hal format="aidl" override="true">
+        <name>android.hardware.security.keymint</name>
+    </hal>
+    <hal format="aidl" override="true">
+        <name>android.hardware.weaver</name>
+    </hal>
+    <hal format="aidl">
+        <name>com.motorola.hardware.biometric.fingerprint</name>
+        <version>2</version>
+        <fqname>IMotoFingerPrint/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>com.motorola.hardware.display.touch</name>
+        <version>3</version>
+        <fqname>IMotTouch/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>com.motorola.hardware.ifaa</name>
+        <fqname>IIFAADevice/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>motorola.hardware.power</name>
+        <version>2</version>
+        <fqname>IMdpfExt/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.nxp.nxpnfc_aidl</name>
+        <fqname>INxpNfc/default</fqname>
+    </hal>
+    <hal format="aidl" override="true">
+        <name>vendor.qti.hardware.spu</name>
+    </hal>
+    <sepolicy>
+        <version>202404</version>
+    </sepolicy>
+</manifest>
