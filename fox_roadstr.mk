@@ -25,7 +25,7 @@ $(call inherit-product, $(DEVICE_PATH)/fox.mk)
 PRODUCT_DEVICE := roadstr
 PRODUCT_NAME := fox_roadstr
 PRODUCT_BRAND := Motorola
-PRODUCT_MODEL := XT2601
+PRODUCT_MODEL := motorola edge 70
 PRODUCT_MANUFACTURER := motorola
 
 PRODUCT_GMS_CLIENTID_BASE := android-motorola
