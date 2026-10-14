@@ -8,6 +8,4 @@
 PRODUCT_MAKEFILES := \
     $(LOCAL_DIR)/fox_roadstr.mk
 
-COMMON_LUNCH_CHOICES := \
-    fox_roadstr-eng \
-    twrp_roadstr-eng
+COMMON_LUNCH_CHOICES := fox_roadstr-eng
