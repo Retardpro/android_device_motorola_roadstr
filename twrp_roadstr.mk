@@ -15,7 +15,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 # Inherit some common Orange Fox stuff.
 $(call inherit-product, vendor/twrp/config/common.mk)
 
-# Inherit from tank device
+# Inherit from roadstr device
 $(call inherit-product, device/motorola/roadstr/device.mk)
 
 PRODUCT_DEVICE := roadstr
