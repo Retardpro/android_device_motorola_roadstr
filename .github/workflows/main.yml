@@ -1,0 +1,90 @@
+
+name: Build TWRP for roadstr
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout device tree
+        uses: actions/checkout@v4
+        with:
+          path: device-tree
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git-core gnupg flex bison build-essential \
+            zip curl zlib1g-dev gcc-multilib g++-multilib \
+            libc6-dev-i386 lib32ncurses-dev x11proto-core-dev \
+            libx11-dev lib32z1-dev libgl1-mesa-dev \
+            libxml2-utils xsltproc unzip fontconfig rsync
+
+      - name: Install Repo
+        run: |
+          mkdir -p "$HOME/bin"
+          curl -fsSL \
+            https://storage.googleapis.com/git-repo-downloads/repo \
+            -o "$HOME/bin/repo"
+          chmod +x "$HOME/bin/repo"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+
+      - name: Initialize TWRP source
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/source"
+          cd "$GITHUB_WORKSPACE/source"
+          repo init --depth=1 \
+            -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
+            -b twrp-12.1
+
+      - name: Sync TWRP source
+        run: |
+          cd "$GITHUB_WORKSPACE/source"
+          repo sync -c --force-sync -j2
+
+      - name: Check XOR compression file
+        run: |
+          cd "$GITHUB_WORKSPACE/source"
+          FILE="build/make/target/product/virtual_ab_ota/compression_with_xor.mk"
+          if [ -f "$FILE" ]; then
+            echo "RESULT: FILE EXISTS"
+            ls -l "$FILE"
+          else
+            echo "RESULT: FILE MISSING"
+            echo "Searching for the file elsewhere..."
+            find build/make -name 'compression_with_xor.mk' -print || true
+          fi
+
+      - name: Add roadstr device tree
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/source/device/motorola/roadstr"
+          rsync -a \
+            --exclude='.git' \
+            "$GITHUB_WORKSPACE/device-tree/" \
+            "$GITHUB_WORKSPACE/source/device/motorola/roadstr/"
+
+      - name: Build recovery
+        run: |
+          cd "$GITHUB_WORKSPACE/source"
+          export ALLOW_MISSING_DEPENDENCIES=true
+          source build/envsetup.sh
+          lunch twrp_roadstr-eng
+          mka recoveryimage -j2
+
+      - name: Upload recovery image
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TWRP-roadstr
+          path: source/out/target/product/roadstr/recovery.img
+          if-no-files-found: error
+          retention-days: 7
+          
