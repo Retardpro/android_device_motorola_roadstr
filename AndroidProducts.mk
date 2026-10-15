@@ -8,4 +8,4 @@
 PRODUCT_MAKEFILES := \
     $(LOCAL_DIR)/twrp_roadstr.mk
 
-COMMON_LUNCH_CHOICES := twrp_roadstr
+COMMON_LUNCH_CHOICES := twrp_roadstr-user
