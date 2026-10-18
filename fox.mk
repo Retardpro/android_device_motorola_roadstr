@@ -4,7 +4,7 @@
 # ======================
 
 # Maintainer name
-OF_MAINTAINER := Imqiyton
+OF_MAINTAINER := Retardpro
 
 # Other stuff
 OF_QUICK_BACKUP_LIST := /boot;/data;
