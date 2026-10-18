@@ -1,55 +1,103 @@
-# ======================
-# OrangeFox props
-# Adapted from Ubuntuify
-# ======================
+#
+#	This file is part of the OrangeFox Recovery Project
+# 	Copyright (C) 2025 The OrangeFox Recovery Project
+#
+#	OrangeFox is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+#	any later version.
+#
+#	OrangeFox is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#
+# 	This software is released under GPL version 3 or any later version.
+#	See <http://www.gnu.org/licenses/>.
+#
+# 	Please maintain this if you use this script or any part of it
+#
 
-# Maintainer name
-OF_MAINTAINER := Retardpro
+# screen settings
+# e.g. if the aspect ratio is 19:9 then use 19*120 (=2280)
+OF_SCREEN_H := 2400
+OF_STATUS_H := 115
+OF_HIDE_NOTCH := 1
+OF_CLOCK_POS := 1
+OF_STATUS_INDENT_LEFT := 56
+OF_STATUS_INDENT_RIGHT := 48
+OF_ALLOW_DISABLE_NAVBAR := 0
+OF_USE_GREEN_LED := 0
 
-# Other stuff
+# other stuff
 OF_QUICK_BACKUP_LIST := /boot;/data;
 OF_ENABLE_LPTOOLS := 1
 OF_NO_TREBLE_COMPATIBILITY_CHECK := 1
-OF_ENABLE_FS_COMPRESSION := 1
 
-# Number of list options before scrollbar creation
-OF_OPTIONS_LIST_NUM := 9
+# number of list options before scrollbar creation
+OF_OPTIONS_LIST_NUM := 11
 
 # A/B with recovery partition
 OF_AB_DEVICE_WITH_RECOVERY_PARTITION := 1
-OF_VAB_ORS_WIPE_DATA_IS_FORMAT := 1
 
-# Formatting userdata
+# ----- data format stuff -----
+# ensure that /sdcard is bind-unmounted before f2fs data repair or format
 OF_UNBIND_SDCARD_F2FS := 1
-OF_WIPE_METADATA_AFTER_DATAFORMAT := 1  # Automatically wipe /metadata after data format
-OF_BIND_MOUNT_SDCARD_ON_FORMAT := 1 # Prevent MTP issues after format
-OF_USE_DMCTL := 1 # Dynamic partition fix for formatting
 
-# Force casefolding with "F2FS" as data format
-OF_FORCE_CASEFOLDING := 1
-OF_FORCE_DATA_FORMAT_F2FS := 1
+# automatically wipe /metadata after data format
+OF_WIPE_METADATA_AFTER_DATAFORMAT := 1
 
-# Don't spam the console with loop errors
+# avoid MTP issues after data format
+OF_BIND_MOUNT_SDCARD_ON_FORMAT := 1
+
+# Set to 1 to attempt to unmount the SD cards before rebooting
+OF_UNMOUNT_SDCARDS_BEFORE_REBOOT := 1
+
+# don't spam the console with loop errors
 OF_LOOP_DEVICE_ERRORS_TO_LOG := 1
 
 # lz4 compression
-OF_USE_LZ4_COMPRESSION := 1
+OF_USE_LZ4_COMPRESSION := 1 
 
-# Build all the partition tools
+# build all the partition tools
 OF_ENABLE_ALL_PARTITION_TOOLS := 1
 
-# Boot HAL is AIDL, and therefore this should be set to allow its proper usage
+ifeq ($(FIXED_DECRYPT),false)
+	# Set to 1 to skip the FBE decryption routines (prevents hanging at the Fox logo or Redmi/Mi logo)
+	OF_SKIP_FBE_DECRYPTION := 1
+endif
+
+# Set this to 1 to replace the "Swipe up" lockscreen screen with a button
+OF_USE_LOCKSCREEN_BUTTON := 1
+
+# Called just before formatting /data; only useful for devices/ROMs that have dynamic partitions
+OF_USE_DMCTL := 1
+
+# Use this to change the default time zone
+OF_DEFAULT_TIMEZONE := GMT0;BST,M3.5.0,M10.5.0
+
+# Set this to 1 if your device uses aidl (as opposed to hidl) to handle boot control, particularly changing slots
 OF_USE_AIDL_BOOT_CONTROL := 1
 
-# Use some CPU magic
-ENABLE_CPUSETS := true
-ENABLE_SCHEDBOOST := true
+# Set this to 1 to remove toggleable option: "Reflash OrangeFox after flashing a ROM"
+# Implemented forced method using /system/bin/pre_rom_flash.sh and .../post_rom_flash.sh
+# OF_NO_REFLASH_CURRENT_ORANGEFOX := 1
 
-# Enable the FRP reset addon
+# Set this to 1 to disable automatic rebooting after openrecoveryscript finishes
+OF_DISABLE_ORS_AUTO_REBOOT := 1
+
+# Set this to 1 to force the selection of f2fs when formatting data
+OF_FORCE_DATA_FORMAT_F2FS := 1
+
+# Set this to 1 to include an addon for removing factory reset protection (FRP)
 OF_ENABLE_FRP_ADDON := 1
 
-# Time fixups
-OF_USE_LEGACY_TIME_FIXUP := 1
+# Set to 1 to force the casefolding props to true. Useful for devices that shipped with Android 11+/FBEv2, where casefolding is always used
+OF_FORCE_CASEFOLDING := 1
 
-# Save orangefox settings into persist partition
-FOX_SETTINGS_ROOT_DIRECTORY := /persist
+# Set to 1 to enable the flashlight feature
+OF_FLASHLIGHT_ENABLE := 1
+OF_FL_PATH1 := /tmp/flashlight
+
+# Set to 1 to block operations after flashing a ROM i.e. formatting data, flashing other zips etc.
+OF_BLOCK_OPERATIONS_AFTER_ROM_FLASH := 1
