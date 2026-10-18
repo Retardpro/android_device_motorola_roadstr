@@ -104,6 +104,9 @@ TW_MAX_BRIGHTNESS := 16180
 # Recovery theme
 TW_THEME := portrait_hdpi
 
+# Vibrator
+TW_VIBRATOR_PATH := /sys/class/leds/vibrator/brightness
+
 # Despite being VA/B device, there is a dedicated recovery partition
 BOARD_USES_RECOVERY_AS_BOOT := 
 BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT :=
