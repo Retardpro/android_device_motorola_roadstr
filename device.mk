@@ -16,6 +16,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit_only.mk)
 
 # Inherit some common Orange Fox stuff.
 $(call inherit-product, vendor/twrp/config/common.mk)
+$(call inherit-product, $(DEVICE_PATH)/fox_roadstr.mk)
 
 
 PRODUCT_PACKAGES += \
