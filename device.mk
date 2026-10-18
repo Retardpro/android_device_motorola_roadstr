@@ -10,6 +10,13 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/developer_gsi_keys.mk)
 # Emulated storage
 $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 
+# Inherit from those products. Most specific first.
+$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit_only.mk)
+
+# Inherit some common Orange Fox stuff.
+$(call inherit-product, vendor/twrp/config/common.mk)
+
 
 PRODUCT_PACKAGES += \
     android.hardware.boot@1.2-impl-qti \
