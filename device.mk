@@ -11,7 +11,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/developer_gsi_keys.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
 
 # Device-specific OrangeFox configuration
-$(call inherit-product, $(DEVICE_PATH)/fox_roadstr.mk)
+$(call inherit-product, $(DEVICE_PATH)/fox.mk)
 
 PRODUCT_PACKAGES += \
     android.hardware.boot@1.2-impl-qti \
