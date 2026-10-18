@@ -4,26 +4,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-
-# Inherit from those products. Most specific first.
-$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
-
-# Inherit some common TWRP stuff.
-$(call inherit-product, vendor/twrp/config/common.mk)
-
 DEVICE_PATH := device/motorola/roadstr
 
-# Inherit from Asteroids device
-$(call inherit-product, $(DEVICE_PATH)/device.mk)
-
 # Include TWRP configurations
-$(call inherit-product, $(DEVICE_PATH)/twrp_config.mk)
 $(call inherit-product, $(DEVICE_PATH)/fox.mk)
 
 
 PRODUCT_DEVICE := roadstr
-PRODUCT_NAME := fox_roadstr
+PRODUCT_NAME := twrp_roadstr
 PRODUCT_BRAND := Motorola
 PRODUCT_MODEL := motorola edge 70
 PRODUCT_MANUFACTURER := motorola
