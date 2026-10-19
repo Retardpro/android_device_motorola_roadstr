@@ -1,0 +1,8 @@
+service weaver_hal_service /vendor/bin/hw/android.hardware.weaver-service.thales
+    class hal
+    user  vendor_thales_weaver
+    group vendor_thales_weaver
+    disabled
+
+on init && property:ro.boot.strongbox_support=true
+    start weaver_hal_service
