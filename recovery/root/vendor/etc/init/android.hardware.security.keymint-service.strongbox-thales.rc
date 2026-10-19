@@ -1,0 +1,37 @@
+service vendor.keymint-strongbox /vendor/bin/hw/android.hardware.security.keymint-service.strongbox-thales
+    class early_hal
+    user vendor_thales_strongbox
+    group vendor_thales_strongbox
+    disabled
+
+on property:sys.bootbroadcast_completed=1 && property:ro.vendor.build.motfactory=1 && property:ro.bootmode=mot-factory && property:ro.boot.strongbox_support=true
+    stop vendor.keymint-strongbox
+
+on property:vendor.tcmd.ese.strongbox.disable=1 && property:ro.bootmode=mot-factory && property:ro.boot.strongbox_support=true
+    stop vendor.keymint-strongbox
+
+on property:vendor.tcmd.ese.strongbox.disable=0 && property:ro.bootmode=mot-factory && property:ro.boot.strongbox_support=true
+    start vendor.keymint-strongbox
+
+on init && property:ro.boot.strongbox_support=true
+    setprop ro.strongbox.manufacturer "Thales"
+    setprop ro.strongbox.model "ST54L-CeSE-1.2"
+    start vendor.keymint-strongbox
+
+on property:vendor.ese.client.restart=1 && property:ro.boot.strongbox_support=true
+    stop vendor.secure_element
+    stop vendor.keymint-strongbox
+    stop keystore2
+    stop weaver_hal_service
+    start keystore2
+    start vendor.keymint-strongbox
+    start vendor.secure_element
+    start weaver_hal_service
+    setprop vendor.ese.client.restart 0
+
+on property:vendor.ese.client.restart=1 && property:ro.boot.strongbox_support=false
+    stop vendor.secure_element
+    stop keystore2
+    start keystore2
+    start vendor.secure_element
+    setprop vendor.ese.client.restart 0
