@@ -57,7 +57,7 @@ BOARD_KERNEL_IMAGE_NAME       := Image
 BOARD_BOOT_HEADER_VERSION     := 4
 BOARD_MKBOOTIMG_ARGS          += --header_version $(BOARD_BOOT_HEADER_VERSION)
 BOARD_MKBOOTIMG_ARGS          += --pagesize $(BOARD_KERNEL_PAGESIZE)
-#TARGET_PREBUILT_KERNEL        := $(DEVICE_PATH)/prebuilt/kernel
+TARGET_PREBUILT_KERNEL        := $(DEVICE_PATH)/prebuilt/kernel
 BOARD_USES_GENERIC_KERNEL_IMAGE := true
 
 # Ramdisk use lz4
