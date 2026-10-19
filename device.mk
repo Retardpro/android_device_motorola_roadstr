@@ -22,6 +22,9 @@ $(call inherit-product, vendor/twrp/config/common.mk)
 # Device-specific OrangeFox configuration
 $(call inherit-product, $(DEVICE_PATH)/fox_roadstr.mk)
 
+# Include haptics config
+$(call inherit-product, $(DEVICE_PATH)/haptics.mk)
+
 # API
 PRODUCT_SHIPPING_API_LEVEL := 34
 PRODUCT_TARGET_VNDK_VERSION := 34
