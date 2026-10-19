@@ -3,7 +3,7 @@
         system/libhidl/vintfdata/manifest.xml
         device/qcom/qssi_64/framework_manifest.xml
 -->
-<manifest version="9.0" type="framework">
+<manifest version="8.0" type="framework">
     <hal format="aidl">
         <name>android.frameworks.sensorservice</name>
         <fqname>ISensorManager/default</fqname>
