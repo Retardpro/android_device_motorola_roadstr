@@ -145,6 +145,9 @@ TW_INCLUDE_LPTOOLS := true
 TARGET_USES_LOGD := true
 TWRP_INCLUDE_LOGCAT := true
 
+#f2fs support
+CONFIG_F2FS_FS := y
+
 # Fastbootd
 TW_INCLUDE_FASTBOOTD := true
 
