@@ -106,6 +106,29 @@ TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 TW_THEME := portrait_hdpi
 
+#f2fs support
+CONFIG_F2FS_FS := y
+
+# Fastbootd
+TW_INCLUDE_FASTBOOTD := true
+
+# Other TWRP Configurations
+TW_THEME := portrait_hdpi
+TW_FRAMERATE := 120
+RECOVERY_SDCARD_ON_DATA := true
+BOARD_HAS_NO_REAL_SDCARD := true
+TARGET_RECOVERY_QCOM_RTC_FIX := true
+TW_EXCLUDE_DEFAULT_USB_INIT := true
+TW_INCLUDE_NTFS_3G := true
+TW_NO_EXFAT_FUSE := false
+TW_USE_TOOLBOX := true
+TARGET_USES_MKE2FS := true
+TW_EXTRA_LANGUAGES := true
+TW_DEFAULT_LANGUAGE := en
+TW_NO_SCREEN_BLANK := true
+TW_EXCLUDE_APEX := true
+TW_HAS_EDL_MODE := true
+
 # Despite being VA/B device, there is a dedicated recovery partition
 BOARD_USES_RECOVERY_AS_BOOT := 
 BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT :=
