@@ -3,68 +3,18 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Copyright (C) 2025 The OrangeFox Recovery Project
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
-# Building with minimal manifest
+DEVICE_PATH := device/motorola/roadstr
+
+# For building with minimal manifest
 ALLOW_MISSING_DEPENDENCIES := true
-
-# Architecture
-TARGET_ARCH := arm64
-TARGET_ARCH_VARIANT := armv8-a
-TARGET_CPU_ABI := arm64-v8a
-TARGET_CPU_ABI2 :=
-TARGET_CPU_VARIANT := kryo
-
-TARGET_2ND_ARCH := arm
-TARGET_2ND_ARCH_VARIANT := $(TARGET_ARCH_VARIANT)
-TARGET_2ND_CPU_ABI := armeabi-v7a
-TARGET_2ND_CPU_ABI2 := armeabi
-TARGET_2ND_CPU_VARIANT := $(TARGET_CPU_VARIANT)
-
-# Power
-ENABLE_CPUSETS := true
-ENABLE_SCHEDBOOST := true
-
-# Bootloader
-PRODUCT_PLATFORM := sun
-TARGET_BOOTLOADER_BOARD_NAME := roadstr
-TARGET_NO_BOOTLOADER := true
-TARGET_USES_UEFI := true
-
-# Platform
-TARGET_BOARD_PLATFORM := sun
-TARGET_BOARD_PLATFORM_GPU := qcom-adreno722
-#BOARD_USES_QCOM_HARDWARE := true
-
-# Kernel
-BOARD_KERNEL_PAGESIZE         := 4096
-TARGET_KERNEL_ARCH            := arm64
-TARGET_KERNEL_HEADER_ARCH     := arm64
-BOARD_KERNEL_IMAGE_NAME       := Image
-BOARD_BOOT_HEADER_VERSION     := 4
-BOARD_MKBOOTIMG_ARGS          += --header_version $(BOARD_BOOT_HEADER_VERSION)
-BOARD_MKBOOTIMG_ARGS          += --pagesize $(BOARD_KERNEL_PAGESIZE)
-TARGET_PREBUILT_KERNEL        := $(DEVICE_PATH)/prebuilt/kernel
-BOARD_USES_GENERIC_KERNEL_IMAGE := true
-
-# Ramdisk use lz4
-BOARD_RAMDISK_USE_LZ4 := true
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+BUILD_BROKEN_USES_NETWORK := true
+BUILD_BROKEN_DUP_RULES := true
+BUILD_BROKEN_MISSING_REQUIRED_MODULES := true
+BUILD_BROKEN_PLUGIN_VALIDATION := soong-libaosprecovery_defaults soong-libguitwrp_defaults soong-libminuitwrp_defaults soong-vold_defaults
 
 # A/B
-BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
 AB_OTA_UPDATER := true
 AB_OTA_PARTITIONS += \
     boot \
@@ -83,105 +33,135 @@ AB_OTA_PARTITIONS += \
     vendor_boot \
     vendor_dlkm
 
-# Verified Boot
-BOARD_AVB_ENABLE := true
+# Architecture
+TARGET_ARCH := arm64
+TARGET_ARCH_VARIANT := armv8-a
+TARGET_CPU_ABI := arm64-v8a
+TARGET_CPU_ABI2 := 
+TARGET_CPU_VARIANT := generic
+TARGET_CPU_VARIANT_RUNTIME := kryo
+TARGET_BOARD_PLATFORM_GPU := qcom-adreno722
+
+# APEX
+DEXPREOPT_GENERATE_APEX_IMAGE := true
+
+# Bootloader
+PRODUCT_PLATFORM := sun
+TARGET_BOOTLOADER_BOARD_NAME := roadstr
+TARGET_NO_BOOTLOADER := true
+TARGET_USES_UEFI := true
+
+# Kernel/Ramdisk
+BOARD_KERNEL_PAGESIZE         := 4096
+TARGET_KERNEL_ARCH            := arm64
+TARGET_KERNEL_HEADER_ARCH     := arm64
+BOARD_KERNEL_IMAGE_NAME       := Image
+BOARD_BOOT_HEADER_VERSION     := 4
+TARGET_PREBUILT_KERNEL        := $(DEVICE_PATH)/prebuilt/kernel
+BOARD_MKBOOTIMG_ARGS          += --header_version $(BOARD_BOOT_HEADER_VERSION)
+BOARD_MKBOOTIMG_ARGS          += --pagesize $(BOARD_KERNEL_PAGESIZE)
+
+
+BOARD_MKBOOTIMG_ARGS += --header_version $(BOARD_BOOT_HEADER_VERSION)
+
+PRODUCT_PRECOMPILED_SEPOLICY := false
 
 # Partitions
-BOARD_RECOVERYIMAGE_PARTITION_SIZE := 134217728
+BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := true
 
-BOARD_BOOTIMAGE_PARTITION_SIZE := 100663296
+TARGET_COPY_OUT_ODM := odm
+BOARD_ODMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_USES_VENDOR_DLKMIMAGE := true
+TARGET_COPY_OUT_VENDOR_DLKM := vendor_dlkm
+BOARD_VENDOR_DLKMIMAGE_FILE_SYSTEM_TYPE := ext4
 
-# Dynamic Partition
-BOARD_SUPER_PARTITION_SIZE := 21541945344
-BOARD_SUPER_PARTITION_GROUPS := qti_dynamic_partitions
-BOARD_QTI_DYNAMIC_PARTITIONS_SIZE := 21537751040
-BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor odm
-
-BOARD_PARTITION_LIST := $(call to-upper, $(BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST))
-$(foreach p, $(BOARD_PARTITION_LIST), $(eval BOARD_$(p)IMAGE_FILE_SYSTEM_TYPE := erofs))
-$(foreach p, $(BOARD_PARTITION_LIST), $(eval TARGET_COPY_OUT_$(p) := $(call to-lower, $(p))))
-
-BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
-
-# File systems
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
-BOARD_USES_VENDOR_DLKMIMAGE := true
+
+BOARD_BOOTIMAGE_PARTITION_SIZE := 100663296
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 134217728
+BOARD_HAS_LARGE_FILESYSTEM := true
+BOARD_SYSTEMIMAGE_PARTITION_TYPE := ext4
+BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_SUPER_PARTITION_SIZE := 21541945344 # TODO: Fix hardcoded value
+BOARD_SUPER_PARTITION_GROUPS := motorola_dynamic_partitions
+BOARD_MOTOROLA_DYNAMIC_PARTITIONS_PARTITION_LIST := system system_ext product vendor odm 
+BOARD_MOTOROLA_DYNAMIC_PARTITIONS_SIZE := 21537751040 # TODO: Fix hardcoded value
 
 # Workaround for error copying vendor files to recovery ramdisk
-BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
 TARGET_COPY_OUT_VENDOR := vendor
 
+# Platform
+TARGET_BOARD_PLATFORM := sun
+BOARD_USES_QCOM_HARDWARE := true
+
+# max brightness 
+TW_MAX_BRIGHTNESS := 16180
+TW_DEFAULT_BRIGHTNESS := 7000
+
 # Recovery
-BOARD_HAS_LARGE_FILESYSTEM := true
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
+TARGET_USERIMAGES_USE_EXT4 := true
+TARGET_USERIMAGES_USE_F2FS := true
+TW_THEME := portrait_hdpi
 
-# Crypto
-FIXED_DECRYPT := false
-TW_INCLUDE_CRYPTO := $(FIXED_DECRYPT)
-TW_INCLUDE_CRYPTO_FBE := $(FIXED_DECRYPT)
-TW_INCLUDE_FBE_METADATA_DECRYPT := $(FIXED_DECRYPT)
-BOARD_USES_QCOM_FBE_DECRYPTION := $(FIXED_DECRYPT)
-TW_USE_FSCRYPT_POLICY := 2
+# Despite being VA/B device, there is a dedicated recovery partition
+BOARD_USES_RECOVERY_AS_BOOT := 
+BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT :=
 
-BOARD_USES_METADATA_PARTITION := true
-PLATFORM_VERSION := 99.87.36
-PLATFORM_SECURITY_PATCH := 2127-12-31
-PLATFORM_VERSION_LAST_STABLE := $(PLATFORM_VERSION)
-VENDOR_SECURITY_PATCH   := $(PLATFORM_SECURITY_PATCH)
-BOOT_SECURITY_PATCH     := $(PLATFORM_SECURITY_PATCH)
+# GSI && GKI
+BOARD_USES_GENERIC_KERNEL_IMAGE := true
+BOARD_MOVE_GSI_AVB_KEYS_TO_VENDOR_BOOT := true
+BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
 
-# Board
+# Use LZ4 Ramdisk compression instead of GZIP
+BOARD_RAMDISK_USE_LZ4 := true
+
+# Board Info file
 TARGET_BOARD_INFO_FILE := $(DEVICE_PATH)/board-info.txt
 
-# Tool
-TW_INCLUDE_REPACKTOOLS := true
-TW_INCLUDE_RESETPROP := true
-TW_INCLUDE_LIBRESETPROP := true
-TW_INCLUDE_LPDUMP := true
-TW_INCLUDE_LPTOOLS := true
+# Security patch level
+VENDOR_SECURITY_PATCH := 2021-08-01
 
-# Debug
-TARGET_USES_LOGD := true
-TWRP_INCLUDE_LOGCAT := true
-
-#f2fs support
-CONFIG_F2FS_FS := y
-
-# Fastbootd
-TW_INCLUDE_FASTBOOTD := true
-
-# Other TWRP Configurations
-TW_THEME := portrait_hdpi
-TW_FRAMERATE := 120
-RECOVERY_SDCARD_ON_DATA := true
-BOARD_HAS_NO_REAL_SDCARD := true
-TARGET_RECOVERY_QCOM_RTC_FIX := true
-TW_EXCLUDE_DEFAULT_USB_INIT := true
-TW_INCLUDE_NTFS_3G := true
-TW_NO_EXFAT_FUSE := false
-TW_USE_TOOLBOX := true
+# Use mke2fs to create ext4 images
 TARGET_USES_MKE2FS := true
-TW_INPUT_BLACKLIST := "hbtp_vm"
-TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
-TW_MAX_BRIGHTNESS := 16180
-TW_EXTRA_LANGUAGES := true
-TW_DEFAULT_LANGUAGE := en
-TW_DEFAULT_BRIGHTNESS := 2000
-TW_NO_SCREEN_BLANK := true
-TW_EXCLUDE_APEX := true
-TW_HAS_EDL_MODE := true
 
-# Haptic
-FIXED_HAPTICS := true
+# System Properties
+TARGET_SYSTEM_PROP := $(DEVICE_PATH)/system.prop
 
-ifeq ($(FIXED_HAPTICS),true)
-   TW_SUPPORT_INPUT_AIDL_HAPTICS := true
-   TW_SUPPORT_INPUT_AIDL_HAPTICS_FQNAME := "IVibrator/vibratorfeature"
-#  TW_SUPPORT_INPUT_AIDL_HAPTICS_FIX_OFF := true
-else
-   TW_NO_HAPTICS := true
-endif
+# Verified Boot
+BOARD_AVB_ENABLE := true
+BOARD_AVB_RECOVERY_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
+BOARD_AVB_RECOVERY_ALGORITHM := SHA256_RSA4096
+BOARD_AVB_RECOVERY_ROLLBACK_INDEX := 1
+BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
+BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3 # disable hashtree/verification
+
+# Encryption
+BOARD_USES_METADATA_PARTITION := true
+BOARD_USES_QCOM_FBE_DECRYPTION := true
+PLATFORM_VERSION := 99.87.36
+PLATFORM_VERSION_LAST_STABLE := $(PLATFORM_VERSION)
+PLATFORM_SECURITY_PATCH := 2099-12-31
+VENDOR_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
+
+DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/recovery/root/vendor/etc/vintf/manifest.xml
+# TARGET_USES_64_BIT_BINDER := true
+
+# Hack: prevent anti rollback
+PLATFORM_SECURITY_PATCH := 2099-12-31
+VENDOR_SECURITY_PATCH := 2099-12-31
+PLATFORM_VERSION := 16.1.0
+
+# Sepolicy
+BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy
+
+TW_HAS_MTP := true
+TW_INTERNAL_STORAGE_PATH   := "/data/media/0"
+TW_INTERNAL_STORAGE_MOUNT_POINT := "data"
+TW_EXTERNAL_STORAGE_PATH   := "/usb_otg"
+TW_EXTERNAL_STORAGE_MOUNT_POINT := "usb_otg"
 
 TW_USE_SERIALNO_PROPERTY_FOR_DEVICE_ID := true
 TW_LOAD_VENDOR_MODULES := "panel_event_notifier.ko goodix_brl_mmi.ko touchscreen_mmi.ko focaltech_v3_4.ko adsp_loader_dlkm.ko rproc_qcom_common.ko q6_dlkm.ko qcom_q6v5.ko qcom_q6v5_pas.ko qcom_sysmon.ko"
