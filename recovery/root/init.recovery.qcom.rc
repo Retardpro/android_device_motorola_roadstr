@@ -13,6 +13,8 @@ on early-init
     write /sys/bus/platform/devices/1d84000.ufshc/enable_wb_buf_flush 0
 
 on init
+    on init
+    start servicemanager
     start vendor.boot-qti
 
 on fs
