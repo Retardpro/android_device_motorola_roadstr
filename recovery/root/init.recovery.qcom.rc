@@ -48,5 +48,13 @@ on property:twrp.modules.loaded=true
 
 on boot
     setprop sys.usb.config adb
+    # Dual LED flashlight workaround
+    start roadstr-flashlight
+
+service roadstr-flashlight /system/bin/roadstr_flashlight.sh
+    class core
+    user root
+    group root
+    seclabel u:r:recovery:s0
 
 import /init.recovery.qcom_decrypt.rc
