@@ -40,47 +40,9 @@ on property:twrp.modules.loaded=true
     write /sys/class/remoteproc/remoteproc1/state start
 
     wait /sys/class/power_supply/battery
-    
-    # Load haptic kernel modules (smem should be loaded by TW_LOAD_VENDOR_MODULES)
-    insmod /lib/modules/haptic.ko
-    insmod /lib/modules/hapticdrv.ko
-
-    # Wait for haptic devices to be created
-    wait /sys/class/leds/vibrator/activate 2
-
-    # Haptic permissions
-    chmod 0666 /dev/aw86927_haptic
-    chown system system /dev/aw86927_haptic
-    chmod 0666 /proc/haptic/f0
-    chown system system /proc/haptic/f0
-    chmod 0666 /proc/haptic/lra_resistance
-    chown system system /proc/haptic/lra_resistance
-    chmod 0666 /proc/haptic/gpp
-    chown system system /proc/haptic/gpp
-    chmod 0666 /sys/class/leds/vibrator/activate
-    chmod 0666 /sys/class/leds/vibrator/duration
-    chmod 0666 /sys/class/leds/vibrator/brightness
-    chmod 0666 /sys/class/leds/vibrator/gain
-    chmod 0666 /sys/class/leds/vibrator/play
-    chmod 0666 /sys/class/leds/vibrator/rtp
-    chmod 0666 /sys/class/leds/vibrator/state
-    chmod 0666 /sys/class/leds/vibrator/stream_start
-    chmod 0666 /sys/class/leds/vibrator/stream_data
-    chmod 0666 /sys/class/leds/vibrator/f0
-    chmod 0666 /sys/class/leds/vibrator/f0_en
-    chmod 0666 /sys/class/leds/vibrator/vbst
-    chmod 0666 /sys/class/leds/vibrator/brake_en
-    chmod 0666 /sys/class/leds/vibrator/daq_en
-    chmod 0666 /sys/class/leds/vibrator/daq_duration
-    chmod 0666 /sys/class/leds/vibrator/daq_data
-    chmod 0666 /sys/class/leds/vibrator/adc_offset
-    chmod 0666 /sys/class/leds/vibrator/lk_f0
-    chmod 0666 /sys/class/leds/vibrator/chip_id
-    chown system system /sys/class/leds/vibrator/activate
-    chown system system /sys/class/leds/vibrator/duration
 
     start health-hal-2-1
-    start vendor.qti.vibrator
+    #start vendor.qti.vibrator
 
     # Unmount /firmware
 
