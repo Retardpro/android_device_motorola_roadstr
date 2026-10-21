@@ -1,7 +1,6 @@
 import /init.recovery.services.qcom_decrypt.fbe.rc
 
 on property:ro.crypto.state=encrypted && property:ro.crypto.type=file
-    install_keyring
 
 
 on property:vendor.sys.listeners.registered=true
