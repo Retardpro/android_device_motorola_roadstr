@@ -41,7 +41,7 @@ Variant         | 6.6
 - [x] Decryption
 - [x] Mounting Partitons
 - [ ] Vibration/Haptics
-- [ ] Battery
+- [x] Battery
 - [x] Customization
 - [x] KernelSU/Magisk Module Managers
 - [x] Other OrangeFox Features
