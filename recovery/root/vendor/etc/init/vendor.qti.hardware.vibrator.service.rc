@@ -1,11 +1,14 @@
 on late-fs
     chmod 0666 /proc/tiktap_buf
     chown system system /proc/tiktap_buf
-service vibratorfeature-hal-service /system/bin/hw/vendor.xiaomi.hardware.vibratorfeature.service
+
+# Motorola/QTI AIDL vibrator HAL. It registers android.hardware.vibrator.IVibrator/default.
+# Started from init.recovery.qcom.rc (`start vendor.qti.vibrator`) once the haptic modules are loaded.
+service vendor.qti.vibrator /vendor/bin/hw/vendor.qti.hardware.vibrator.service
     class hal
     user root
     group root input audio
-    setenv LD_LIBRARY_PATH /system/lib64/qti_vibrator:/system/lib64:/vendor/lib64:/vendor/lib64/hw:/sbin
+    setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib64/hw:/system/lib64:/sbin
     disabled
     seclabel u:r:recovery:s0
 
