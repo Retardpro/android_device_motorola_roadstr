@@ -29,7 +29,7 @@ on fs
 
     # Mount firmware - Needed for ADSP firmwares
     mkdir /firmware
-    mount vfat /dev/block/by-name/modem${ro.boot.slot_suffix} /firmware ro
+    mount ext4 /dev/block/by-name/modem${ro.boot.slot_suffix} /firmware ro
 
     # Mount persist - Needed for haptics
     # We want to load this BEFORE "twrp.modules.loaded=true"
