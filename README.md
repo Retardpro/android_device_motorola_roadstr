@@ -35,9 +35,9 @@ Variant         | 6.6
 - [x] Installing and flashing images
 - [x] Torch
 - [x] Browsing/Editing files
-- [ ] MTP
+- [x] MTP
 - [x] ADB/Sideload
-- [ ] Decryption
+- [x] Decryption
 - [ ] Vibration/Haptics 
 
 Thanks to dx4m for providing battery and otg support
