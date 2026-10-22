@@ -1,11 +1,8 @@
-on late-fs
-    chmod 0666 /proc/tiktap_buf
-    chown system system /proc/tiktap_buf
-service vibratorfeature-hal-service /system/bin/hw/vendor.xiaomi.hardware.vibratorfeature.service
+service vendor.qti.vibrator /vendor/bin/hw/vendor.qti.hardware.vibrator.service
     class hal
     user root
-    group root input audio
-    setenv LD_LIBRARY_PATH /system/lib64/qti_vibrator:/system/lib64:/vendor/lib64:/vendor/lib64/hw:/sbin
+    group root system input
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64:/vendor/lib64/hw
     disabled
     seclabel u:r:recovery:s0
 
