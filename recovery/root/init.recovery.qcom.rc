@@ -13,9 +13,12 @@ on early-init
     write /sys/bus/platform/devices/1d84000.ufshc/enable_wb_buf_flush 0
 
 on init
-    on init
-    start servicemanager
     start vendor.boot-qti
+
+# Start framework services only after /system is mounted,
+# so servicemanager gets its proper SELinux label and domain transition.
+on late-init
+    class_start core
 
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
@@ -44,9 +47,7 @@ on property:twrp.modules.loaded=true
     wait /sys/class/power_supply/battery
 
     start health-hal-2-1
-    #start vendor.qti.vibrator
-
-    # Unmount /firmware
+    start vendor.qti.vibrator
 
 on boot
     setprop sys.usb.config adb
