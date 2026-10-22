@@ -1,15 +1,7 @@
 service servicemanager /system/bin/servicemanager
     class core animation
-    user system
-    group system readproc
-    critical
+    user root
+    group root readproc
     file /dev/kmsg w
+    seclabel u:r:recovery:s0
     onrestart setprop servicemanager.ready false
-    onrestart restart --only-if-running apexd
-    onrestart restart audioserver
-    onrestart restart gatekeeperd
-    onrestart class_restart --only-enabled main
-    onrestart class_restart --only-enabled hal
-    onrestart class_restart --only-enabled early_hal
-    task_profiles ProcessCapacityHigh
-    shutdown critical
