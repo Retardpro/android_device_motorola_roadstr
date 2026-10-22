@@ -27,7 +27,7 @@ $(call inherit-product, vendor/twrp/config/common.mk)
 $(call inherit-product, $(DEVICE_PATH)/fox_roadstr.mk)
 
 # Vibration fix
-$(call inherit-product, $(DEVICE_PATH)/haptic.mk)
+$(call inherit-product, $(DEVICE_PATH)/haptics.mk)
 
 PRODUCT_PACKAGES += \
     android.hardware.boot@1.2-impl-qti \
