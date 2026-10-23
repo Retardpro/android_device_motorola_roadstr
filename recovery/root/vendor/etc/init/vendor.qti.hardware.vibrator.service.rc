@@ -1,3 +1,7 @@
+on late-fs
+    chmod 0666 /proc/tiktap_buf
+    chown system system /proc/tiktap_buf
+
 service vendor.qti.vibrator /vendor/bin/hw/vendor.qti.hardware.vibrator.service
     class hal
     user root
@@ -5,6 +9,3 @@ service vendor.qti.vibrator /vendor/bin/hw/vendor.qti.hardware.vibrator.service
     setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64:/vendor/lib64/hw
     disabled
     seclabel u:r:recovery:s0
-
-on late-init
-    write /sys/class/leds/vibrator/trigger "transient"
