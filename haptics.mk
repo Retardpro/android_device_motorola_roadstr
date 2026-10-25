@@ -19,5 +19,5 @@ else
 endif
 
 # Load Haptic drivers
-TW_LOAD_VENDOR_MODULES := "qti_battery_charger.ko qcom-hv-haptics.ko swr_dlkm.ko swr_haptic_dlkm.ko aw_haptic_hv_v1_5.ko"
+TW_LOAD_VENDOR_MODULES := "qti_battery_charger.ko awinic_sar.ko aw882xx_dlkm.ko qcom-hv-haptics.ko swr_dlkm.ko swr_haptic_dlkm.ko aw_haptic_hv_v1_5.ko"
 TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
