@@ -27,7 +27,7 @@ Recovery        | r12.0.8
 Variant         | 6.6
 
 > [!NOTE]
-> Unofficial Build, expect bugs
+> Unofficial Build, if find bugs report
 
 ## Checklist
 
@@ -42,7 +42,7 @@ Variant         | 6.6
 - [x] ADB/Sideload
 - [x] Decryption
 - [x] Mounting Partitons
-- [ ] Vibration/Haptics
+- [x] Vibration/Haptics
 - [x] Battery
 - [x] Customization
 - [x] Screen/Brightness
