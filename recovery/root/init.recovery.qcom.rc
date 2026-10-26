@@ -47,6 +47,16 @@ on property:twrp.modules.loaded=true
     wait /sys/class/power_supply/battery
 
     start health-hal-2-1
+
+    # Vibration: load the Awinic haptics driver, wait for its LED node, then start the HAL
+    insmod /lib/modules/aw_haptic_hv_v1_5.ko
+    wait /sys/class/leds/vibrator/activate 5
+    chown system system /sys/class/leds/vibrator/activate
+    chown system system /sys/class/leds/vibrator/duration
+    chown system system /sys/class/leds/vibrator/state
+    chmod 0660 /sys/class/leds/vibrator/activate
+    chmod 0660 /sys/class/leds/vibrator/duration
+    chmod 0660 /sys/class/leds/vibrator/state
     start vendor.qti.vibrator
 
 on boot
