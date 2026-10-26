@@ -195,7 +195,7 @@ TW_EXTERNAL_STORAGE_PATH   := "/usb_otg"
 TW_EXTERNAL_STORAGE_MOUNT_POINT := "usb_otg"
 
 TW_USE_SERIALNO_PROPERTY_FOR_DEVICE_ID := true
-TW_LOAD_VENDOR_MODULES := "panel_event_notifier.ko goodix_brl_mmi.ko touchscreen_mmi.ko focaltech_v3_4.ko adsp_loader_dlkm.ko rproc_qcom_common.ko q6_dlkm.ko qcom_q6v5.ko qcom_q6v5_pas.ko qcom_sysmon.ko"
+TW_LOAD_VENDOR_MODULES := "panel_event_notifier.ko aw_haptic_hv_v1_5.ko goodix_brl_mmi.ko touchscreen_mmi.ko focaltech_v3_4.ko adsp_loader_dlkm.ko rproc_qcom_common.ko q6_dlkm.ko qcom_q6v5.ko qcom_q6v5_pas.ko qcom_sysmon.ko"
 TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
 TW_CUSTOM_CPU_TEMP_PATH := "/sys/class/thermal/thermal_zone2/temp"
 TW_BATTERY_SYSFS_WAIT_SECONDS := 6
