@@ -22,7 +22,7 @@ jobs:
     env:
       SYNC_URL: https://gitlab.com/OrangeFox/sync.git
       MANIFEST_BRANCH: "16.0"
-      DEVICE_TREE_URL: https://github.com/Retardpro/device/motorola/roadstr
+      DEVICE_TREE_URL: https://github.com/Retardpro/android_device_motorola_roadstr
       DEVICE_TREE_BRANCH: main
       DEVICE_PATH: device/motorola/roadstr
       DEVICE_NAME: roadstr
