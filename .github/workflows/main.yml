@@ -1,3 +1,4 @@
+
 name: Recovery Build
 
 on:
@@ -53,12 +54,12 @@ jobs:
         chmod +x /tmp/send_msg.sh
 
     - name: Initialize workspace
+      id: pwd
       run: |
         /tmp/send_msg.sh "🚀 *Starting OrangeFox build* for \`${{ env.DEVICE_NAME }}\` (\`${{ env.DEVICE_TREE_BRANCH }}\`)\n🔗 [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
         mkdir workspace
         cd workspace
-        echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
-      id: pwd
+        echo "workspace-folder=$(pwd)" >> "$GITHUB_OUTPUT"
 
     - name: Prepare the build environment
       run: |
@@ -79,18 +80,20 @@ jobs:
     - name: Sync OrangeFox sources and minimal manifest
       run: |
         /tmp/send_msg.sh "🌐 Syncing OrangeFox sources..."
-        cd ${{ steps.pwd.outputs.workspace-folder }}
-        git clone --depth=1 ${{ env.SYNC_URL }}
+        cd "${{ steps.pwd.outputs.workspace-folder }}"
+        git clone --depth=1 "${{ env.SYNC_URL }}"
         cd sync
-        ./orangefox_sync.sh --branch ${{ env.MANIFEST_BRANCH }} --path ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}
+        ./orangefox_sync.sh \
+          --branch "${{ env.MANIFEST_BRANCH }}" \
+          --path "${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}"
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
     - name: Get latest bootable/recovery commit
       id: recovery_commit
       run: |
-        cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/bootable/recovery
+        cd "${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/bootable/recovery"
         RECOVERY_COMMIT=$(git rev-parse --short=7 HEAD)
-        echo "RECOVERY_COMMIT=$RECOVERY_COMMIT" >> $GITHUB_OUTPUT
+        echo "RECOVERY_COMMIT=$RECOVERY_COMMIT" >> "$GITHUB_OUTPUT"
         echo "Latest bootable/recovery commit: $RECOVERY_COMMIT"
         /tmp/send_msg.sh "🔁 bootable/recovery: [${RECOVERY_COMMIT}](https://gitlab.com/OrangeFox/bootable/Recovery/tree/${RECOVERY_COMMIT})"
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
@@ -98,16 +101,17 @@ jobs:
     - name: Clone device tree
       run: |
         /tmp/send_msg.sh "🌲 Cloning device tree for \`${{ env.DEVICE_NAME }}\`..."
-        cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}
-        git clone --depth=1 ${{ env.DEVICE_TREE_URL }} -b ${{ env.DEVICE_TREE_BRANCH }} ./${{ env.DEVICE_PATH }}
+        cd "${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}"
+        git clone --depth=1 "${{ env.DEVICE_TREE_URL }}" \
+          -b "${{ env.DEVICE_TREE_BRANCH }}" "./${{ env.DEVICE_PATH }}"
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
     - name: Get latest device tree commit
       id: devtree_commit
       run: |
-        cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/${{ env.DEVICE_PATH }}
+        cd "${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}/${{ env.DEVICE_PATH }}"
         LATEST_COMMIT=$(git rev-parse --short=7 HEAD)
-        echo "LATEST_COMMIT=$LATEST_COMMIT" >> $GITHUB_OUTPUT
+        echo "LATEST_COMMIT=$LATEST_COMMIT" >> "$GITHUB_OUTPUT"
         echo "Latest device tree commit: $LATEST_COMMIT"
         /tmp/send_msg.sh "🌲 Device tree: [${LATEST_COMMIT}](${{ env.DEVICE_TREE_URL }}/tree/$LATEST_COMMIT)"
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
@@ -133,7 +137,7 @@ jobs:
     - name: Building recovery
       run: |
         /tmp/send_msg.sh "⚙️ Starting build for \`${{ env.DEVICE_NAME }}\`..."
-        cd ${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}
+        cd "${{ steps.pwd.outputs.workspace-folder }}/fox_${{ env.MANIFEST_BRANCH }}"
 
         set +e
         source build/envsetup.sh
@@ -142,9 +146,43 @@ jobs:
         export FOX_MAINTAINER_PATCH_VERSION="8"
         set -e
 
-        lunch ${{ env.MAKEFILE_NAME }}
+        lunch "${{ env.MAKEFILE_NAME }}"
 
-        if ! mka adbd ${{ env.BUILD_TARGET }}image -j$(nproc --all); then
+        # Fix missing build_fingerprint.txt if the build environment
+        # can provide a valid fingerprint.
+        FINGERPRINT_FILE="out/target/product/${{ env.DEVICE_NAME }}/build_fingerprint.txt"
+
+        if [ ! -s "$FINGERPRINT_FILE" ]; then
+          echo "Build fingerprint file is missing; checking build variables..."
+
+          BUILD_FINGERPRINT="$(get_build_var BUILD_FINGERPRINT 2>/dev/null || true)"
+
+          if [ -z "$BUILD_FINGERPRINT" ]; then
+            echo "ERROR: BUILD_FINGERPRINT is empty."
+            echo "Checking available product configuration..."
+            get_build_var TARGET_PRODUCT || true
+            get_build_var TARGET_DEVICE || true
+            get_build_var BUILD_ID || true
+            exit 1
+          fi
+
+          mkdir -p "$(dirname "$FINGERPRINT_FILE")"
+          printf '%s\n' "$BUILD_FINGERPRINT" > "$FINGERPRINT_FILE"
+
+          echo "Created missing fingerprint file."
+          echo "Fingerprint: $BUILD_FINGERPRINT"
+        else
+          echo "Build fingerprint file already exists."
+          cat "$FINGERPRINT_FILE"
+        fi
+
+        # Verify the fingerprint file before compiling.
+        test -s "$FINGERPRINT_FILE" || {
+          echo "ERROR: Fingerprint file is still missing or empty."
+          exit 1
+        }
+
+        if ! mka adbd "${{ env.BUILD_TARGET }}image" -j"$(nproc --all)"; then
           /tmp/send_msg.sh "❌ Build failed for \`${{ env.DEVICE_NAME }}\` (\`${{ env.DEVICE_TREE_BRANCH }}\`)\n🔗 [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           exit 1
         fi
@@ -189,3 +227,4 @@ jobs:
         DEVICE_TREE_BROWSE_URL="${{ env.DEVICE_TREE_URL }}/tree/${{ steps.devtree_commit.outputs.LATEST_COMMIT }}"
         RECOVERY_BROWSE_URL="https://gitlab.com/OrangeFox/bootable/Recovery/tree/${{ steps.recovery_commit.outputs.RECOVERY_COMMIT }}"
         /tmp/send_msg.sh "📦 *Build complete!*\n🔗 [Download]($RELEASE_URL)\n🌲 Device tree branch: \`${{ env.DEVICE_TREE_BRANCH }}\`\n🌲 Device tree commit: [${{ steps.devtree_commit.outputs.LATEST_COMMIT }}]($DEVICE_TREE_BROWSE_URL)\n🔁 bootable/recovery commit: [${{ steps.recovery_commit.outputs.RECOVERY_COMMIT }}]($RECOVERY_BROWSE_URL)"
+        
