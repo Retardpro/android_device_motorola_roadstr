@@ -21,4 +21,4 @@ PRODUCT_GMS_CLIENTID_BASE := android-motorola
 PRODUCT_BUILD_PROP_OVERRIDES += \
     PRIVATE_BUILD_DESC="roadstr_g-user 17 A171WRM-A171-ST3 3d8c7 test-keys"
 
-BUILD_FINGERPRINT := motorola/roadstr_g/msi:17/A171WRM-A171-ST3/3d8c7>
+BUILD_FINGERPRINT := motorola/roadstr_g/msi:17/A171WRM-A171-ST3/3d8c7
