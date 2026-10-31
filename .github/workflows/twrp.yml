@@ -26,11 +26,28 @@ jobs:
       - name: Install Repo Tool
         run: |
           mkdir -p "$HOME/bin"
-          curl -L https://storage.googleapis.com/git-repo-downloads/repo \
+
+          curl -L \
+            https://storage.googleapis.com/git-repo-downloads/repo \
             -o "$HOME/bin/repo"
+
           chmod +x "$HOME/bin/repo"
           echo "$HOME/bin" >> "$GITHUB_PATH"
+
           "$HOME/bin/repo" --version
+
+      - name: Configure Swap
+        run: |
+          echo "Memory before swap:"
+          free -h
+
+          sudo fallocate -l 12G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
+          echo "Memory after swap:"
+          free -h
 
       - name: Initialize TWRP Source
         run: |
@@ -44,8 +61,9 @@ jobs:
       - name: Sync Sources
         run: |
           cd "$GITHUB_WORKSPACE/twrp"
+
           repo sync -c --no-tags --no-clone-bundle \
-            -j$(nproc) --force-sync
+            -j2 --force-sync
 
       - name: Clone Roadstr Device Tree
         run: |
@@ -72,10 +90,18 @@ jobs:
       - name: Build Recovery
         run: |
           cd "$GITHUB_WORKSPACE/twrp"
+
+          export ALLOW_MISSING_DEPENDENCIES=true
+          export USE_CCACHE=1
+          export CCACHE_DIR="$GITHUB_WORKSPACE/.ccache"
+
           source build/envsetup.sh
           lunch twrp_roadstr-bp2a-eng
 
-          mka recoveryimage -j$(nproc)
+          echo "Available memory:"
+          free -h
+
+          mka recoveryimage -j2
 
       - name: Upload Recovery Image
         uses: actions/upload-artifact@v4
