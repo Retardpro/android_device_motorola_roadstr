@@ -41,13 +41,23 @@ jobs:
           echo "Memory before swap:"
           free -h
 
-          sudo fallocate -l 12G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
+          if sudo swapon --show=NAME --noheadings | grep -q '^/swapfile$'; then
+            echo "/swapfile is already active."
+          elif [ -f /swapfile ]; then
+            echo "Existing swapfile found."
+            sudo chmod 600 /swapfile
+            sudo swapon /swapfile
+          else
+            echo "Creating additional swap."
+            sudo fallocate -l 8G /swapfile
+            sudo chmod 600 /swapfile
+            sudo mkswap /swapfile
+            sudo swapon /swapfile
+          fi
 
           echo "Memory after swap:"
           free -h
+          sudo swapon --show
 
       - name: Initialize TWRP Source
         run: |
