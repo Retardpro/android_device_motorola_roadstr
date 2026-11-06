@@ -8,9 +8,9 @@ on:
         required: false
         default: ""
       lunch_combo:
-        description: "Lunch combo"
-        required: true
-        default: "twrp_roadstr-eng"
+        description: "Lunch combo (leave empty to auto-detect, e.g. twrp_roadstr-ap2a-eng)"
+        required: false
+        default: ""
       build_targets:
         description: "mka targets"
         required: true
@@ -108,10 +108,28 @@ jobs:
           set +e
           set -o pipefail
           source build/envsetup.sh
-          # twrp-14.1 is Android 14 based: no release-config in the lunch combo (bp2a was Android 16 only)
+          # This tree needs <product>-<release>-<variant>; the release (ap1a/ap2a/...) is auto-detected below
           export ALLOW_MISSING_DEPENDENCIES=true
           export LC_ALL=C
-          lunch "${{ github.event.inputs.lunch_combo || 'twrp_roadstr-eng' }}" || exit 1
+          echo "Available release configs:"
+          ls build/release/release_configs 2>/dev/null || true
+          REQUESTED="${{ github.event.inputs.lunch_combo }}"
+          if [ -n "$REQUESTED" ]; then
+            CANDIDATES="$REQUESTED"
+          else
+            CANDIDATES="twrp_roadstr-ap2a-eng twrp_roadstr-ap1a-eng twrp_roadstr-ap3a-eng twrp_roadstr-trunk_staging-eng twrp_roadstr-eng"
+          fi
+          LUNCH_USED=""
+          for c in $CANDIDATES; do
+            echo ">>> trying lunch $c"
+            if lunch "$c"; then LUNCH_USED="$c"; break; fi
+          done
+          if [ -z "$LUNCH_USED" ]; then
+            echo "::error::No valid lunch combo found (tried: $CANDIDATES)"
+            exit 1
+          fi
+          echo "Using lunch combo: $LUNCH_USED"
+          echo "LUNCH_USED=$LUNCH_USED" >> "$GITHUB_ENV"
           mka ${{ github.event.inputs.build_targets || 'adbd recoveryimage' }} -j"$(nproc --all)" 2>&1 | tee "$HOME/build.log"
           exit "${PIPESTATUS[0]}"
 
@@ -157,7 +175,7 @@ jobs:
           body: |
             TWRP build for Motorola ${{ env.DEVICE_CODENAME }}
             - Manifest branch: `${{ env.MANIFEST_BRANCH }}`
-            - Lunch: `${{ github.event.inputs.lunch_combo || 'twrp_roadstr-eng' }}`
+            - Lunch: `${{ env.LUNCH_USED }}`
             - Device tree: ${{ env.DEVICE_TREE_URL }}
           files: artifacts/*
           
