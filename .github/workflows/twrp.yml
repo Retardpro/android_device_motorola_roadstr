@@ -1,4 +1,4 @@
-name: Build TWRP (Motorola roadstr)
+name: Build YARP Recovery.(Motorola roadstr)
 
 on:
   workflow_dispatch:
