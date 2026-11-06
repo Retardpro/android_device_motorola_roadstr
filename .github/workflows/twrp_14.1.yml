@@ -1,4 +1,4 @@
-name: Build TWRP 14.1 (Motorola roadstr)
+name: Build TWRP (Motorola roadstr)
 
 on:
   workflow_dispatch:
@@ -30,6 +30,7 @@ env:
   TZ: Asia/Kolkata
   # ccache is intentionally disabled: the Soong sandbox makes everything outside out/ read-only
   USE_CCACHE: "0"
+  TWRP_DIR: ${{ github.workspace }}/twrp
 
 jobs:
   build:
@@ -40,25 +41,21 @@ jobs:
       contents: write
 
     steps:
-      - name: Free up disk space
-        run: |
-          echo "Before:"; df -h /
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
-                      /opt/hostedtoolcache/CodeQL /usr/local/share/boost \
-                      /usr/share/swift /usr/local/.ghcup "$AGENT_TOOLSDIRECTORY"
-          sudo docker image prune --all --force || true
-          sudo apt-get -qq autoremove --purge -y || true
-          sudo apt-get -qq clean
-          echo "After:"; df -h /
+      # Pools the free space of / and /mnt into one big volume mounted at the workspace.
+      # Must run before anything is written to the workspace.
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@v10
+        with:
+          root-reserve-mb: 6144
+          swap-size-mb: 8192
+          remove-dotnet: "true"
+          remove-android: "true"
+          remove-haskell: "true"
+          remove-codeql: "true"
+          remove-docker-images: "true"
 
-      - name: Add swap
-        run: |
-          sudo swapoff -a || true
-          sudo fallocate -l 16G /mnt/swapfile
-          sudo chmod 600 /mnt/swapfile
-          sudo mkswap /mnt/swapfile
-          sudo swapon /mnt/swapfile
-          free -h
+      - name: Show disk
+        run: df -h / "$GITHUB_WORKSPACE"; free -h
 
       - name: Install build dependencies
         run: |
@@ -84,19 +81,19 @@ jobs:
 
       - name: Init TWRP source
         run: |
-          mkdir -p "$HOME/twrp"
-          cd "$HOME/twrp"
-          repo init -u "$MANIFEST_URL" -b "$MANIFEST_BRANCH"
+          mkdir -p "$TWRP_DIR"
+          cd "$TWRP_DIR"
+          repo init --depth=1 -u "$MANIFEST_URL" -b "$MANIFEST_BRANCH"
 
       - name: Sync source
-        working-directory: /home/runner/twrp
+        working-directory: ${{ env.TWRP_DIR }}
         run: |
           repo sync -c --no-tags --no-clone-bundle -j"$(nproc)" \
             || repo sync -c --no-tags --no-clone-bundle -j4 --force-sync
           df -h /
 
       - name: Clone device tree
-        working-directory: /home/runner/twrp
+        working-directory: ${{ env.TWRP_DIR }}
         run: |
           BRANCH_ARG=""
           if [ -n "${{ github.event.inputs.device_tree_branch }}" ]; then
@@ -106,7 +103,7 @@ jobs:
           ls -la "$DEVICE_PATH"
 
       - name: Build recovery
-        working-directory: /home/runner/twrp
+        working-directory: ${{ env.TWRP_DIR }}
         run: |
           set +e
           set -o pipefail
@@ -120,7 +117,7 @@ jobs:
 
       - name: Collect output
         if: success()
-        working-directory: /home/runner/twrp
+        working-directory: ${{ env.TWRP_DIR }}
         run: |
           OUT="out/target/product/${DEVICE_CODENAME}"
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
