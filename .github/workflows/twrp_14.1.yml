@@ -1,0 +1,166 @@
+name: Build TWRP 14.1 (Motorola roadstr)
+
+on:
+  workflow_dispatch:
+    inputs:
+      device_tree_branch:
+        description: "Device tree branch (leave empty for default branch)"
+        required: false
+        default: ""
+      lunch_combo:
+        description: "Lunch combo"
+        required: true
+        default: "twrp_roadstr-eng"
+      build_targets:
+        description: "mka targets"
+        required: true
+        default: "adbd recoveryimage"
+      create_release:
+        description: "Publish a GitHub release with the images"
+        type: boolean
+        required: false
+        default: false
+
+env:
+  MANIFEST_URL: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
+  MANIFEST_BRANCH: twrp-14.1
+  DEVICE_TREE_URL: https://github.com/Retardpro/android_device_motorola_roadstr
+  DEVICE_PATH: device/motorola/roadstr
+  DEVICE_CODENAME: roadstr
+  TZ: Asia/Kolkata
+  # ccache is intentionally disabled: the Soong sandbox makes everything outside out/ read-only
+  USE_CCACHE: "0"
+
+jobs:
+  build:
+    name: Build recovery
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    permissions:
+      contents: write
+
+    steps:
+      - name: Free up disk space
+        run: |
+          echo "Before:"; df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /opt/hostedtoolcache/CodeQL /usr/local/share/boost \
+                      /usr/share/swift /usr/local/.ghcup "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune --all --force || true
+          sudo apt-get -qq autoremove --purge -y || true
+          sudo apt-get -qq clean
+          echo "After:"; df -h /
+
+      - name: Add swap
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 16G /mnt/swapfile
+          sudo chmod 600 /mnt/swapfile
+          sudo mkswap /mnt/swapfile
+          sudo swapon /mnt/swapfile
+          free -h
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git-core gnupg flex bison build-essential zip unzip curl wget zlib1g-dev \
+            gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev \
+            libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc fontconfig \
+            libncurses5 libncurses5-dev libssl-dev bc lzop python3 python3-pip \
+            rsync ccache lz4 xz-utils pngcrush schedtool imagemagick openjdk-17-jdk \
+            cpio file git-lfs ca-certificates
+          mkdir -p ~/.bin
+          curl -fsSL https://storage.googleapis.com/git-repo-downloads/repo -o ~/.bin/repo
+          chmod a+x ~/.bin/repo
+          echo "$HOME/.bin" >> "$GITHUB_PATH"
+          sudo ln -sf /usr/bin/python3 /usr/local/bin/python || true
+
+      - name: Configure git
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global color.ui false
+
+      - name: Init TWRP source
+        run: |
+          mkdir -p "$HOME/twrp"
+          cd "$HOME/twrp"
+          repo init -u "$MANIFEST_URL" -b "$MANIFEST_BRANCH"
+
+      - name: Sync source
+        working-directory: /home/runner/twrp
+        run: |
+          repo sync -c --no-tags --no-clone-bundle -j"$(nproc)" \
+            || repo sync -c --no-tags --no-clone-bundle -j4 --force-sync
+          df -h /
+
+      - name: Clone device tree
+        working-directory: /home/runner/twrp
+        run: |
+          BRANCH_ARG=""
+          if [ -n "${{ github.event.inputs.device_tree_branch }}" ]; then
+            BRANCH_ARG="-b ${{ github.event.inputs.device_tree_branch }}"
+          fi
+          git clone --depth=1 $BRANCH_ARG "$DEVICE_TREE_URL" "$DEVICE_PATH"
+          ls -la "$DEVICE_PATH"
+
+      - name: Build recovery
+        working-directory: /home/runner/twrp
+        run: |
+          set +e
+          set -o pipefail
+          source build/envsetup.sh
+          # twrp-14.1 is Android 14 based: no release-config in the lunch combo (bp2a was Android 16 only)
+          export ALLOW_MISSING_DEPENDENCIES=true
+          export LC_ALL=C
+          lunch "${{ github.event.inputs.lunch_combo || 'twrp_roadstr-eng' }}" || exit 1
+          mka ${{ github.event.inputs.build_targets || 'adbd recoveryimage' }} -j"$(nproc --all)" 2>&1 | tee "$HOME/build.log"
+          exit "${PIPESTATUS[0]}"
+
+      - name: Collect output
+        if: success()
+        working-directory: /home/runner/twrp
+        run: |
+          OUT="out/target/product/${DEVICE_CODENAME}"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts"
+          for f in recovery.img boot.img vendor_boot.img; do
+            [ -f "$OUT/$f" ] && cp -v "$OUT/$f" "$GITHUB_WORKSPACE/artifacts/"
+          done
+          ls -lh "$GITHUB_WORKSPACE/artifacts"
+          (cd "$GITHUB_WORKSPACE/artifacts" && sha256sum * > SHA256SUMS.txt)
+          if ! ls "$GITHUB_WORKSPACE/artifacts"/*.img >/dev/null 2>&1; then
+            echo "::error::No images were produced in $OUT"
+            ls -la "$OUT" || true
+            exit 1
+          fi
+
+      - name: Upload images
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: twrp-${{ env.DEVICE_CODENAME }}-${{ github.run_number }}
+          path: artifacts/*
+          if-no-files-found: error
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.run_number }}
+          path: /home/runner/build.log
+          if-no-files-found: ignore
+
+      - name: Create release
+        if: success() && github.event.inputs.create_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: twrp-${{ env.DEVICE_CODENAME }}-${{ github.run_number }}
+          name: TWRP ${{ env.DEVICE_CODENAME }} #${{ github.run_number }}
+          body: |
+            TWRP build for Motorola ${{ env.DEVICE_CODENAME }}
+            - Manifest branch: `${{ env.MANIFEST_BRANCH }}`
+            - Lunch: `${{ github.event.inputs.lunch_combo || 'twrp_roadstr-eng' }}`
+            - Device tree: ${{ env.DEVICE_TREE_URL }}
+          files: artifacts/*
+          
