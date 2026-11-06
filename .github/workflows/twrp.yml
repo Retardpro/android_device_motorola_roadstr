@@ -98,14 +98,14 @@ jobs:
           repo init --depth=1 -u "$MANIFEST_URL" -b "$MANIFEST_BRANCH"
 
       - name: Sync source
-        working-directory: ~/twrp
+        working-directory: /home/runner/twrp
         run: |
           repo sync -c -j"$(nproc --all)" --force-sync --no-clone-bundle --no-tags \
             || repo sync -c -j4 --force-sync --no-clone-bundle --no-tags
           df -h /
 
       - name: Clone device tree
-        working-directory: ~/twrp
+        working-directory: /home/runner/twrp
         run: |
           BRANCH_ARG=""
           if [ -n "${{ github.event.inputs.device_tree_branch }}" ]; then
@@ -115,7 +115,7 @@ jobs:
           ls -la "$DEVICE_PATH"
 
       - name: Build recovery
-        working-directory: ~/twrp
+        working-directory: /home/runner/twrp
         run: |
           set +e
           set -o pipefail
@@ -131,7 +131,7 @@ jobs:
 
       - name: Collect output
         if: success()
-        working-directory: ~/twrp
+        working-directory: /home/runner/twrp
         run: |
           OUT="out/target/product/${DEVICE_CODENAME}"
           mkdir -p "$GITHUB_WORKSPACE/artifacts"
@@ -159,7 +159,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ github.run_number }}
-          path: ~/build.log
+          path: /home/runner/build.log
           if-no-files-found: ignore
 
       - name: Create release
