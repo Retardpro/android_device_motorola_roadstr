@@ -28,9 +28,8 @@ env:
   DEVICE_PATH: device/motorola/roadstr
   DEVICE_CODENAME: roadstr
   TZ: Asia/Kolkata
-  CCACHE_DIR: ${{ github.workspace }}/.ccache
-  USE_CCACHE: "1"
-  CCACHE_EXEC: /usr/bin/ccache
+  # ccache is intentionally disabled: the Soong sandbox makes everything outside out/ read-only
+  USE_CCACHE: "0"
 
 jobs:
   build:
@@ -83,14 +82,6 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global color.ui false
 
-      - name: Restore ccache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ env.DEVICE_CODENAME }}-${{ github.run_id }}
-          restore-keys: |
-            ccache-${{ env.DEVICE_CODENAME }}-
-
       - name: Init TWRP source (shallow)
         run: |
           mkdir -p "$HOME/twrp"
@@ -124,7 +115,6 @@ jobs:
           # bp2a is required: ap2a has board API 202404, which breaks vendor sepolicy (hal_hwcrypto)
           export ALLOW_MISSING_DEPENDENCIES=true
           export LC_ALL=C
-          ccache -M 10G || true
           lunch "${{ github.event.inputs.lunch_combo || 'twrp_roadstr-bp2a-eng' }}" || exit 1
           mka ${{ github.event.inputs.build_targets || 'adbd recoveryimage' }} -j"$(nproc --all)" 2>&1 | tee "$HOME/build.log"
           exit "${PIPESTATUS[0]}"
